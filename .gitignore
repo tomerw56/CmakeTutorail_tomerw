@@ -1,32 +1,85 @@
-# Prerequisites
-*.d
+# -----------------------------------------------------------------------------
+# General build folders used throughout the tutorial
+# -----------------------------------------------------------------------------
+build/
+build-*/
+out/
+dist/
+install/
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
+# -----------------------------------------------------------------------------
+# CMake-generated files and folders
+# -----------------------------------------------------------------------------
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+CPackConfig.cmake
+CPackSourceConfig.cmake
+compile_commands.json
+Testing/
+_install/
+install_manifest.txt
+
+# -----------------------------------------------------------------------------
+# Per-example build outputs that may appear inside example folders by mistake
+# -----------------------------------------------------------------------------
+examples/**/build/
+examples/**/build-*/
+examples/**/out/
+examples/**/dist/
+examples/**/install/
+
+# -----------------------------------------------------------------------------
+# Generated IDE/project files
+# -----------------------------------------------------------------------------
+.vs/
+.idea/
+.vscode/
+
+# Visual Studio
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.VC.db
+*.VC.opendb
+
+# -----------------------------------------------------------------------------
+# Compiler and linker outputs
+# -----------------------------------------------------------------------------
 *.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
+*.o
+*.lo
 *.la
 *.a
 *.lib
-
-# Executables
+*.dll
+*.so
+*.so.*
+*.dylib
 *.exe
-*.out
-*.app
+*.exp
+*.pdb
+*.idb
+*.ilk
+*.manifest
+
+# -----------------------------------------------------------------------------
+# Temporary and log files
+# -----------------------------------------------------------------------------
+*.log
+*.tmp
+*.temp
+
+# -----------------------------------------------------------------------------
+# Python cache (for later script chapters)
+# -----------------------------------------------------------------------------
+__pycache__/
+*.pyc
+
+# -----------------------------------------------------------------------------
+# OS-generated files
+# -----------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
