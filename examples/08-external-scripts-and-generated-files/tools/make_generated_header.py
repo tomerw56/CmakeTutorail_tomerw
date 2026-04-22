@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future__ import 
 
 import sys
 from pathlib import Path
@@ -32,4 +32,4 @@ namespace generated_build_info
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main())annotations
