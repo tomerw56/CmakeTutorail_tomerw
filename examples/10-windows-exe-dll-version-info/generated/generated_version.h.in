@@ -1,0 +1,29 @@
+#pragma once
+
+#define APP_VERSION "@PROJECT_VERSION@"
+#define APP_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define APP_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define APP_VERSION_PATCH @PROJECT_VERSION_PATCH@
+
+namespace generated_version
+{
+    inline const char* version()
+    {
+        return APP_VERSION;
+    }
+
+    inline int major()
+    {
+        return APP_VERSION_MAJOR;
+    }
+
+    inline int minor()
+    {
+        return APP_VERSION_MINOR;
+    }
+
+    inline int patch()
+    {
+        return APP_VERSION_PATCH;
+    }
+}
