@@ -74,7 +74,8 @@ If you are already familiar with the basics, you can jump directly to specific t
 │  ├─ 09-versioning-in-cmake.md
 │  ├─ 10-windows-exe-dll-version-info.md
 │  ├─ 11-install-export-package.md
-│  └─ 12-practical-commands-and-gotchas.md
+│  ├─ 12-SWIG-and-python-interface-generation.md
+│  └─ 13-practical-commands-and-gotchas.md
 ├─ examples/
 │  ├─ 01-first-project/
 │  ├─ 02-build-systems-and-generators/
@@ -86,10 +87,13 @@ If you are already familiar with the basics, you can jump directly to specific t
 │  ├─ 08-external-scripts-and-generated-files/
 │  ├─ 09-versioning-in-cmake/
 │  ├─ 10-windows-exe-dll-version-info/
-│  └─ 11-install-export-package/
+│  ├─ 11-install-export-package/
+│  └─ 12-swig-and-python-interface-generation/
 └─ cmake/
    └─ helpers/
 ````
+
+
 ---
 ## Base material and credits
 This tutorial is inspired by and builds on the official CMake tutorial.
@@ -226,7 +230,9 @@ How to define project version information and make it available to code and pack
 How to stamp Windows binaries with version metadata using resource files.
 ### 11 - Install, export, and package
 How to install artifacts, export targets, and prepare projects for reuse.
-### 12 - Practical commands and gotchas
+### 12 - SWIG Interface Generation
+How to generate python interface as part of the build process.
+### 13 - Practical commands and gotchas
 A compact reference for useful commands, patterns, and common mistakes.
 ---
 ## A note on style
