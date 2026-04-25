@@ -4,7 +4,8 @@ This repository is meant for developers who want to learn CMake in a way that ma
 executables, libraries, generators, testing, dependencies, external scripts, versioning, and packaging.
 The goal is not just to explain CMake syntax.  
 The goal is to build a clear mental model and then apply it to realistic examples.
----
+
+ ---
 ## What this repository is
 This repo is a guided tutorial for learning modern CMake step by step.
 Each chapter has:
@@ -15,7 +16,8 @@ Each chapter has:
 - common mistakes and notes
 This repository is intentionally markdown-first and code-oriented.  
 It is meant to feel like engineering documentation, not presentation material.
----
+
+ ---
 ## Who this is for
 This tutorial is aimed at:
 - C and C++ developers new to CMake
@@ -24,7 +26,8 @@ This tutorial is aimed at:
 - Windows developers using Visual Studio
 - developers using Ninja or other command-line generators
 A basic knowledge of C++ and compiling code is assumed.
----
+
+ ---
 ## What you will learn
 By working through this repo, you will learn how to:
 - configure and build a project with CMake
@@ -42,7 +45,8 @@ By working through this repo, you will learn how to:
 - manage project version information
 - stamp version info into Windows EXE and DLL files
 - install, export, and package projects
----
+
+ ---
 ## How to read this repo
 The recommended flow is:
 1. Read the chapter markdown
@@ -64,9 +68,11 @@ This repo includes a few reusable practical helpers:
 - `tools/docs/clean-reset.md` - documented reset workflow for stale build trees
 
 
----
+
+ ---
 ## Repository layout
-```text
+
+ ``` text
 .
 ├─ README.md
 ├─ chapters/
@@ -99,10 +105,10 @@ This repo includes a few reusable practical helpers:
 │  └─ 12-swig-and-python-interface-generation/
 └─ cmake/
    └─ helpers/
-````
 
+ ``` 
 
----
+ ---
 ## Base material and credits
 This tutorial is inspired by and builds on the official CMake tutorial.
 Primary base material:
@@ -116,10 +122,12 @@ Reference page describing that location:
 Credit goes to the CMake / Kitware documentation authors for the official tutorial structure and examples that serve as the conceptual starting point for this repository.
 This repository does **not** attempt to replace the official documentation.
 Instead, it uses the official tutorial as a base and expands it in a more practical, code-first direction for day-to-day development work.
----
+
+ ---
 ## Required tools
 You do not need every tool for every chapter, but this is the practical tool set used across the repository.
-### Core required tools
+
+ ### Core required tools
 * **CMake**
   Official download page: [https://cmake.org/download/](https://cmake.org/download/)
 * **A C++ compiler and build environment**
@@ -128,40 +136,48 @@ You do not need every tool for every chapter, but this is the practical tool set
 * **A generator / build backend**
   * **Ninja**: [https://ninja-build.org/](https://ninja-build.org/)
   * Ninja manual: [https://ninja-build.org/manual.html](https://ninja-build.org/manual.html)
-### Recommended supporting tools
+
+ ### Recommended supporting tools
 * **Git**
   Useful for cloning the repo and, later, for version-related examples: [https://git-scm.com/](https://git-scm.com/)
 * **Python 3**
   Used in chapters that generate files or call external scripts: [https://www.python.org/downloads/](https://www.python.org/downloads/)
-### Testing-related tools
+
+ ### Testing-related tools
 * **GoogleTest**
   For the GoogleTest chapter we will show how to fetch it from the network using CMake, so a manual install is not required in advance: [https://github.com/google/googletest](https://github.com/google/googletest)
----
+
+ ---
 ## Tool notes by chapter
 * **Chapters 00-05**: CMake + compiler + generator are enough
 * **Chapter 06**: same, plus CTest support from CMake
 * **Chapter 07**: internet access is useful for fetching GoogleTest with `FetchContent`
 * **Chapter 08**: Python is recommended for external script and generated-file examples
 * **Chapter 10**: Windows resource compilation requires a Windows toolchain such as Visual Studio
----
+
+ ---
 ## Prerequisites
 You should have:
 * CMake installed
 * a C++ compiler
 * at least one supported generator/build backend
 Typical setups include:
-### Windows
+
+ ### Windows
 * Visual Studio 2022
 * or Ninja + MSVC
 * or Ninja + Clang
-### Linux
+
+ ### Linux
 * GCC or Clang
 * Ninja or Make
-### Helpful optional tools
+
+ ### Helpful optional tools
 * Git
 * Python 3
 * GoogleTest for local experimentation, though the tutorial will also show how to fetch it
----
+
+ ---
 ## Core idea: CMake is not the compiler
 CMake does not compile your code directly.
 CMake:
@@ -173,76 +189,103 @@ Examples of generators/backends:
 * Unix Makefiles
 * Visual Studio
 This is one of the most important ideas in the whole tutorial.
----
+
+ ---
 ## Quick start
 A typical workflow looks like this:
-```bash
+
+ ``` bash
 cmake -S . -B build
 cmake --build build
-```
+
+ ``` 
 This means:
 * `-S .` = source directory is the current directory
 * `-B build` = generate build files into the `build/` directory
 If you use Ninja explicitly:
-```bash
+
+ ``` bash
 cmake -S . -B build -G Ninja
 cmake --build build
-```
+
+ ``` 
 If you use Visual Studio:
-```bash
+
+ ``` bash
 cmake -S . -B build -G "Visual Studio 17 2022"
 cmake --build build --config Debug
-```
+
+ ``` 
 Note that Visual Studio is a multi-config generator, so you usually specify `--config Debug` or `--config Release` when building.
----
+
+ ---
 ## Recommended learning path
-### Part 1 - Foundations
+
+ ### Part 1 - Foundations
 1. Introduction and mental model
 2. First project
 3. Build systems and generators
 4. Libraries
 5. Usage requirements
 6. Debug and Release configurations
-### Part 2 - Practical everyday workflows
+
+ ### Part 2 - Practical everyday workflows
 7. Testing with CTest
 8. GoogleTest and FetchContent
 9. External scripts and generated files
 10. Versioning in CMake
 11. Windows EXE and DLL version info
-### Part 3 - Shipping and scaling
+
+ ### Part 3 - Shipping and scaling
 12. Install, export, and package
 13. Practical commands and gotchas
----
+
+ ---
 ## Chapter index
-### 00 - Introduction and mental model
+
+ ### 00 - Introduction and mental model
 What CMake is, what it is not, and the core ideas needed before writing any files.
-### 01 - First project
+
+ ### 01 - First project
 A minimal executable and the smallest useful `CMakeLists.txt`.
-### 02 - Build systems and generators
+
+ ### 02 - Build systems and generators
 What Ninja, Visual Studio, and other generators are, and how generator choice affects the workflow.
-### 03 - Libraries
+
+ ### 03 - Libraries
 Creating static and shared libraries and linking them into applications.
-### 04 - Usage requirements
+
+ ### 04 - Usage requirements
 How `PUBLIC`, `PRIVATE`, and `INTERFACE` work, and why modern CMake is target-oriented.
-### 05 - Configurations: Debug and Release
+
+ ### 05 - Configurations: Debug and Release
 How configurations work, especially the difference between single-config and multi-config generators.
-### 06 - Testing with CTest
+
+ ### 06 - Testing with CTest
 The native test model in CMake and how to register and run tests.
-### 07 - GoogleTest and FetchContent
+
+ ### 07 - GoogleTest and FetchContent
 How to bring in a testing framework from the network and integrate it cleanly.
-### 08 - External scripts and generated files
+
+ ### 08 - External scripts and generated files
 How to call Python or other scripts, generate files, and connect them to targets.
-### 09 - Versioning in CMake
+
+ ### 09 - Versioning in CMake
 How to define project version information and make it available to code and packaging.
-### 10 - Windows EXE and DLL version info
+
+ ### 10 - Windows EXE and DLL version info
 How to stamp Windows binaries with version metadata using resource files.
-### 11 - Install, export, and package
+
+ ### 11 - Install, export, and package
 How to install artifacts, export targets, and prepare projects for reuse.
-### 12 - SWIG Interface Generation
+
+ ### 12 - SWIG Interface Generation
 How to generate python interface as part of the build process.
-### 13 - Practical commands and gotchas
+
+ ### 13 - Practical commands and gotchas
 A compact reference for useful commands, patterns, and common mistakes.
----
+
+ ---
 ## A note on style
 This tutorial prefers:
 * small examples
@@ -252,39 +295,55 @@ This tutorial prefers:
 * practical commands over long theory
 Whenever possible, examples will show the modern target-oriented style rather than older global-variable-heavy approaches.
 That said, older patterns may still be mentioned when useful for reading existing codebases.
----
+
+ ---
 ## Common command cheat sheet
 Configure:
-```bash
+
+ ``` bash
 cmake -S . -B build
-```
+
+ ``` 
 Configure with a generator:
-```bash
+
+ ``` bash
 cmake -S . -B build -G Ninja
-```
+
+ ``` 
 Build:
-```bash
+
+ ``` bash
 cmake --build build
-```
+
+ ``` 
 Build a specific configuration:
-```bash
+
+ ``` bash
 cmake --build build --config Release
-```
+
+ ``` 
 Install:
-```bash
+
+ ``` bash
 cmake --install build
-```
+
+ ``` 
 Run tests:
-```bash
+
+ ``` bash
 ctest --test-dir build
-```
+
+ ``` 
 Pass a cache variable:
-```bash
+
+ ``` bash
 cmake -S . -B build -DMY_OPTION=ON
-```
+
+ ``` 
 Clean by removing the build tree:
 * delete the `build/` directory
----
+
+ ---
 ## What this tutorial does not try to do
 This repo does not try to:
 * document every single CMake command
@@ -292,7 +351,8 @@ This repo does not try to:
 * cover every platform-specific edge case
 * teach C++ itself
 Instead, it tries to give you a clean, practical path through the parts of CMake that are most useful in day-to-day engineering work.
----
+
+ ---
 ## References
 Official CMake material used as the base for this tutorial:
 * CMake Tutorial: [https://cmake.org/cmake/help/latest/guide/tutorial/index.html](https://cmake.org/cmake/help/latest/guide/tutorial/index.html)
@@ -306,7 +366,8 @@ Official tool pages used throughout the repo:
 * Python downloads: [https://www.python.org/downloads/](https://www.python.org/downloads/)
 * GoogleTest: [https://github.com/google/googletest](https://github.com/google/googletest)
 * Git: [https://git-scm.com/](https://git-scm.com/)
----
+
+ ---
 ## Status
 This repository is being built chapter by chapter.
 Planned initial focus:
@@ -318,7 +379,8 @@ Planned initial focus:
 * external scripts
 * versioning
 * Windows binary metadata
----
+
+ ---
 ## Suggested way to use this repo in a team
 A good team workflow is:
 * read one chapter
