@@ -56,6 +56,14 @@ If you are already familiar with the basics, you can jump directly to specific t
 - FetchContent
 - custom commands and external scripts
 - Windows version resources
+
+## Project helpers
+This repo includes a few reusable practical helpers:
+- `tools/cmake/warnings.cmake` - target-based warning level and warnings-as-errors policy
+- `tools/CMakePresets.json` - shared local and CI-style presets
+- `tools/docs/clean-reset.md` - documented reset workflow for stale build trees
+
+
 ---
 ## Repository layout
 ```text
