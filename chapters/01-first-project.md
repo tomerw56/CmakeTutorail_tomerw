@@ -30,29 +30,35 @@ Output:
 ---
 ## Folder layout
 Example folder:
-```text
+
+ ``` text
 examples/
 └─ 01-first-project/
    ├─ CMakeLists.txt
    └─ main.cpp
-````
+
+ ``` `
 ---
 ## The code
 ## `CMakeLists.txt`
-```cmake
+
+ ``` cmake
 cmake_minimum_required(VERSION 3.23)
 project(FirstProject LANGUAGES CXX)
 add_executable(first_project main.cpp)
-```
+
+ ``` 
 ## `main.cpp`
-```cpp
+
+ ``` cpp
 #include <iostream>
 int main()
 {
     std::cout << "Hello from the first CMake project!\n";
     return 0;
 }
-```
+
+ ``` 
 ---
 ## Line by line
 ## `cmake_minimum_required(VERSION 3.23)`
@@ -79,9 +85,11 @@ This is our first real target.
 ---
 ## What target name means here
 The target name is:
-```text
+
+ ``` text
 first_project
-```
+
+ ``` 
 That name is important because it is how CMake refers to the executable internally.
 Later, when we add:
 * libraries
@@ -92,9 +100,11 @@ we will attach those things to targets by name.
 ---
 ## Configure the project
 Open a terminal in the repository root and run:
-```bash
+
+ ``` bash
 cmake -S examples/01-first-project -B build/01-first-project
-```
+
+ ``` 
 What this means:
 * `-S examples/01-first-project` tells CMake where the source directory is
 * `-B build/01-first-project` tells CMake where to generate the build tree
@@ -105,9 +115,11 @@ That is the pattern we want throughout the tutorial:
 ---
 ## Build the project
 After configure succeeds, build it with:
-```bash
+
+ ``` bash
 cmake --build build/01-first-project
-```
+
+ ``` 
 This tells CMake to invoke the generated backend build system inside that build directory.
 Depending on your generator and platform, this step will:
 * compile `main.cpp`
@@ -116,88 +128,133 @@ Depending on your generator and platform, this step will:
 ---
 ## Run the executable
 How you run the executable depends on the generator and platform.
-### On Linux or with single-config generators
+
+ ### On Linux or with single-config generators
 A common pattern is:
-```bash
+
+ ``` bash
 ./build/01-first-project/first_project
-```
-### On Windows with a Ninja-style single-config build
+
+ ``` 
+
+ ### On Windows with a Ninja-style single-config build
 A common pattern is:
-```powershell
+
+ ``` powershell
 .\build\01-first-project\first_project.exe
-```
-### On Windows with Visual Studio
-The executable is often under a configuration subdirectory such as `Debug` or `Release`:
-```powershell
+
+ ``` 
+
+ ### On Windows with Visual Studio
+The executable is often under a configuration subdirectory such as `Debug` or 
+`Release`:
+
+ ``` powershell
 .\build\01-first-project\Debug\first_project.exe
-```
+
+ ``` 
 or
-```powershell
+
+ ``` powershell
 .\build\01-first-project\Release\first_project.exe
-```
+
+ 
+ ```  
 ---
 ## Configure and build with Ninja
 If you want to be explicit about the generator:
-```bash
+
+ 
+ ```  bash
 cmake -S examples/01-first-project -B build/01-first-project-ninja -G Ninja
 cmake --build build/01-first-project-ninja
-```
+
+ 
+ ```  
 Run it with:
-### Linux
-```bash
+
+ ### Linux
+
+ 
+ ```  bash
 ./build/01-first-project-ninja/first_project
-```
-### Windows
-```powershell
+
+ 
+ ```  
+
+ ### Windows
+
+ 
+ ```  powershell
 .\build\01-first-project-ninja\first_project.exe
-```
+
+ ``` 
 ---
 ## Configure and build with Visual Studio 2022
-```bash
+
+ ``` bash
 cmake -S examples/01-first-project -B build/01-first-project-vs -G "Visual Studio 17 2022"
 cmake --build build/01-first-project-vs --config Debug
-```
+
+ ``` 
 Run it with:
-```powershell
+
+ ``` powershell
 .\build\01-first-project-vs\Debug\first_project.exe
-```
+
+ ``` 
 You can also build Release:
-```bash
+
+ ``` bash
 cmake --build build/01-first-project-vs --config Release
-```
+
+ ``` 
 and then run:
-```powershell
+
+ ``` powershell
 .\build\01-first-project-vs\Release\first_project.exe
-```
+
+ ``` 
 ---
 ## Expected output
 When you run the program, you should see:
-```text
+
+ ``` text
 Hello from the first CMake project!
-```
+
+ ``` 
 ---
 ## What to notice
 There are a few important things to notice in this tiny example.
-### 1. The source tree stays clean
+
+ ### 1. The source tree stays clean
 We did not generate files next to `main.cpp`.
-### 2. Configure and build are separate
+
+ ### 2. Configure and build are separate
 We first generated the build system, then built the code.
-### 3. The target is named explicitly
+
+ ### 3. The target is named explicitly
 The executable is created by target name, not by some global compiler command.
-### 4. Output paths can vary by generator
+
+ ### 4. Output paths can vary by generator
 Especially on Windows and with Visual Studio, outputs often appear under config-specific folders.
 ---
 ## Common mistakes
-### 1. Running `cmake --build` before configure
+
+ ### 1. Running `cmake --build` before configure
 You need the configure step first.
-### 2. Running from the wrong directory
+
+ ### 2. Running from the wrong directory
 Be clear about the source path and build path.
-### 3. Assuming output paths are identical for all generators
+
+ ### 3. Assuming output paths are identical for all generators
 They are not.
 Visual Studio often adds `Debug/` or `Release/`.
-### 4. Mixing source and build files
+
+ ### 4. Mixing source and build files
 Do not create outputs inside the example source folder.
-### 5. Forgetting that the target name is not always the same as the project name
+
+ ### 5. Forgetting that the target name is not always the same as the project name
 In this example:
 * project name: `FirstProject`
 * executable target name: `first_project`

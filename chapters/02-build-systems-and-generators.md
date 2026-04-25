@@ -4,6 +4,7 @@ Now we focus on one of the most important practical CMake topics:
 **generators**.
 This chapter explains why the same `CMakeLists.txt` can drive different build workflows, and why commands that feel natural with Ninja are sometimes slightly different with Visual Studio.
 If Chapter 01 was about creating a first target, this chapter is about understanding the environment that target lives in.
+
 ---
 ## Why this matters
 A lot of confusion around CMake comes from not knowing which part is CMake and which part is the backend build system.
@@ -15,6 +16,7 @@ When people say things like:
 they are usually hitting generator differences.
 Once this clicks, many CMake workflows become much easier to reason about.
 ---
+
 ## What we will learn
 In this chapter we will cover:
 - what a generator is
@@ -44,11 +46,13 @@ So the generator is the bridge between:
 ---
 ## The same project, different backends
 Suppose we have this simple project:
-```cmake
+
+ ``` cmake
 cmake_minimum_required(VERSION 3.23)
 project(FirstProject LANGUAGES CXX)
 add_executable(first_project main.cpp)
-````
+
+ ``` `
 That file does not say:
 * "use Ninja only"
 * "use Visual Studio only"
@@ -59,19 +63,28 @@ That is one of the central ideas of CMake.
 ---
 ## Generator choice happens during configure
 You choose the generator when you run the configure command.
-### Example: default generator
-```bash
+
+ ### Example: default generator
+
+ ``` bash
 cmake -S examples/01-first-project -B build/01-default
-```
+
+ ``` 
 CMake will pick a default generator based on the platform and environment.
-### Example: Ninja
-```bash
+
+ ### Example: Ninja
+
+ ``` bash
 cmake -S examples/01-first-project -B build/01-ninja -G Ninja
-```
-### Example: Visual Studio 2022
-```bash
+
+ ``` 
+
+ ### Example: Visual Studio 2022
+
+ ``` bash
 cmake -S examples/01-first-project -B build/01-vs2022 -G "Visual Studio 17 2022"
-```
+
+ ``` 
 That generator choice becomes part of the build tree.
 This is important:
 a build directory is not just "some outputs folder".
@@ -80,15 +93,19 @@ It is tied to a particular generator and configuration model.
 ## One build folder per generator is a good habit
 Because the generator is baked into the build tree, it is a good idea to keep different generators in different build folders.
 Good examples:
-```text
+
+ ``` text
 build/01-ninja/
 build/01-vs2022/
 build/01-make/
-```
+
+ ``` 
 Bad example:
-```text
+
+ ``` text
 build/
-```
+
+ ``` 
 and then reusing it for different generators.
 If you configured a build directory once with Visual Studio and later try to use the same build directory with Ninja, you are likely to get errors or confusing behavior.
 A clean rule is:
@@ -98,49 +115,63 @@ A clean rule is:
 ---
 ## Single-config vs multi-config generators
 This is the most important distinction in this chapter.
-### Single-config generators
+
+ ### Single-config generators
 Typical examples:
 * Ninja
 * Unix Makefiles
 These usually represent one main build configuration per build directory.
 For example, if you configure with:
-```bash
+
+ ``` bash
 cmake -S examples/01-first-project -B build/01-ninja-debug -G Ninja -DCMAKE_BUILD_TYPE=Debug
-```
+
+ ``` 
 that build folder is effectively a Debug build tree.
 If you want Release too, you usually create another build folder:
-```bash
+
+ ``` bash
 cmake -S examples/01-first-project -B build/01-ninja-release -G Ninja -DCMAKE_BUILD_TYPE=Release
-```
+
+ ``` 
 So with single-config generators, configuration is usually chosen at configure time.
 ---
-### Multi-config generators
+
+ ### Multi-config generators
 Typical examples:
 * Visual Studio
 * some Xcode workflows
 These can manage multiple configurations in the same build tree.
 For example:
-```bash
+
+ ``` bash
 cmake -S examples/01-first-project -B build/01-vs2022 -G "Visual Studio 17 2022"
-```
+
+ ``` 
 Then later you choose the configuration at build time:
-```bash
+
+ ``` bash
 cmake --build build/01-vs2022 --config Debug
 cmake --build build/01-vs2022 --config Release
-```
+
+ ``` 
 So with multi-config generators, configuration is often chosen at build time.
 That is why Visual Studio workflows often look different from Ninja workflows.
 ---
 ## Why `CMAKE_BUILD_TYPE` is not universal
 A very common beginner mistake is assuming this always controls build configuration:
-```bash
+
+ ``` bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-```
+
+ ``` 
 That works naturally for many single-config generators.
 But for multi-config generators like Visual Studio, the configuration is typically selected later with:
-```bash
+
+ ``` bash
 cmake --build build --config Release
-```
+
+ ``` 
 So a useful rule is:
 * **single-config**: `CMAKE_BUILD_TYPE` usually matters
 * **multi-config**: `--config Debug/Release` usually matters
@@ -149,22 +180,32 @@ This one point explains a lot of confusing first experiences with CMake.
 ## Output directories can differ
 Another thing that surprises people is executable location.
 With a single-config generator like Ninja, a simple executable may appear directly under the build folder:
-### Linux
-```bash
+
+ ### Linux
+
+ ``` bash
 ./build/01-ninja-debug/first_project
-```
-### Windows
-```powershell
+
+ ``` 
+
+ ### Windows
+
+ ``` powershell
 .\build\01-ninja-debug\first_project.exe
-```
+
+ ``` 
 With Visual Studio, you often get configuration-specific subfolders:
-```powershell
+
+ ``` powershell
 .\build\01-vs2022\Debug\first_project.exe
-```
+
+ ``` 
 or
-```powershell
+
+ ``` powershell
 .\build\01-vs2022\Release\first_project.exe
-```
+
+ ``` 
 So when a program "built successfully" but you cannot find it, check:
 * which generator you used
 * which configuration you built
@@ -177,65 +218,106 @@ We will compare the same tiny project under two workflows:
 The source files are still the same as in Chapter 01.
 ---
 ## Workflow A - Ninja
-### Configure Debug
-```bash
+
+ ### Configure Debug
+
+ ``` bash
 cmake -S examples/01-first-project -B build/02-ninja-debug -G Ninja -DCMAKE_BUILD_TYPE=Debug
-```
-### Build
-```bash
+
+ ``` 
+
+ ### Build
+
+ ``` bash
 cmake --build build/02-ninja-debug
-```
-### Run
-#### Linux
-```bash
+
+ ``` 
+
+ ### Run
+
+ #### Linux
+
+ ``` bash
 ./build/02-ninja-debug/first_project
-```
-#### Windows
-```powershell
+
+ ``` 
+
+ #### Windows
+
+ ``` powershell
 .\build\02-ninja-debug\first_project.exe
-```
-### Configure Release
-```bash
+
+ ``` 
+
+ ### Configure Release
+
+ ``` bash
 cmake -S examples/01-first-project -B build/02-ninja-release -G Ninja -DCMAKE_BUILD_TYPE=Release
-```
-### Build Release
-```bash
+
+ ``` 
+
+ ### Build Release
+
+ ``` bash
 cmake --build build/02-ninja-release
-```
-### Run Release
-#### Linux
-```bash
+
+ ``` 
+
+ ### Run Release
+
+ #### Linux
+
+ ``` bash
 ./build/02-ninja-release/first_project
-```
-#### Windows
-```powershell
+
+ ``` 
+
+ #### Windows
+
+ ``` powershell
 .\build\02-ninja-release\first_project.exe
-```
+
+ ``` 
 Notice the pattern:
 * separate build folders
 * each folder has one main configuration
 ---
 ## Workflow B - Visual Studio 2022
-### Configure once
-```bash
+
+ ### Configure once
+
+ ``` bash
 cmake -S examples/01-first-project -B build/02-vs2022 -G "Visual Studio 17 2022"
-```
-### Build Debug
-```bash
+
+ ``` 
+
+ ### Build Debug
+
+ ``` bash
 cmake --build build/02-vs2022 --config Debug
-```
-### Run Debug
-```powershell
+
+ ``` 
+
+ ### Run Debug
+
+ ``` powershell
 .\build\02-vs2022\Debug\first_project.exe
-```
-### Build Release
-```bash
+
+ ``` 
+
+ ### Build Release
+
+ ``` bash
 cmake --build build/02-vs2022 --config Release
-```
-### Run Release
-```powershell
+
+ ``` 
+
+ ### Run Release
+
+ ``` powershell
 .\build\02-vs2022\Release\first_project.exe
-```
+
+ ``` 
 Notice the pattern:
 * one build folder
 * multiple configurations selected later
@@ -243,11 +325,13 @@ Notice the pattern:
 ## Same source, different workflow
 This is the key lesson.
 The source project stays the same:
-```cmake
+
+ ``` cmake
 cmake_minimum_required(VERSION 3.23)
 project(FirstProject LANGUAGES CXX)
 add_executable(first_project main.cpp)
-```
+
+ ``` 
 What changes is:
 * the generator
 * the build tree
@@ -258,9 +342,11 @@ keep the project description as stable as possible while allowing different back
 ---
 ## How to see available generators
 A useful command is:
-```bash
+
+ ``` bash
 cmake --help
-```
+
+ ``` 
 This usually prints general help and includes available generators on the current machine.
 That is often the fastest way to answer:
 * "what generators are available here?"
@@ -269,12 +355,14 @@ That is often the fastest way to answer:
 ---
 ## Choosing a generator in practice
 A simple practical rule set is:
-### Use Ninja when:
+
+ ### Use Ninja when:
 * you want a fast command-line workflow
 * you want simple, direct builds
 * you are comfortable with explicit build folders
 * you want predictable single-config behavior
-### Use Visual Studio when:
+
+ ### Use Visual Studio when:
 * your team works mainly in Visual Studio
 * you want a familiar Windows IDE workflow
 * you want multi-config behavior in one build tree
@@ -292,16 +380,21 @@ Examples:
 That kind of standardization helps because generator differences are real, and different defaults can make troubleshooting harder.
 ---
 ## Common mistakes
-### 1. Reusing the same build folder with different generators
+
+ ### 1. Reusing the same build folder with different generators
 This is one of the most common mistakes.
 If you want a different generator, create a different build folder.
-### 2. Using `CMAKE_BUILD_TYPE` with Visual Studio and expecting that alone to control everything
+
+ ### 2. Using `CMAKE_BUILD_TYPE` with Visual Studio and expecting that alone to control everything
 For Visual Studio, `--config` is usually the key control at build time.
-### 3. Forgetting which configuration was built
+
+ ### 3. Forgetting which configuration was built
 Especially with multi-config generators, Debug and Release can both exist in the same tree.
-### 4. Looking for the executable in the wrong place
+
+ ### 4. Looking for the executable in the wrong place
 Different generators often place outputs differently.
-### 5. Assuming the default generator is the same on every machine
+
+ ### 5. Assuming the default generator is the same on every machine
 It is not.
 Defaults depend on platform and environment.
 ---
@@ -330,5 +423,3 @@ We will introduce:
 * shared libraries
 * linking an executable to a library
 That is where target-based CMake starts to become much more interesting.
-```
-```
