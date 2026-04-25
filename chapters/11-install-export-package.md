@@ -9,7 +9,8 @@ to:
 - “another project can consume it”
 - “I can package it for distribution”
 This is where a project starts to behave like something other people can actually use.
----
+
+ ---
 ## Why this matters
 Up to this point, most of our examples have lived inside the build tree.
 That is useful for learning, but real projects eventually need to:
@@ -19,7 +20,8 @@ That is useful for learning, but real projects eventually need to:
 - provide package configuration files
 - create distributable packages
 A clean install/export/package story turns a project from “something that builds here” into “something that can be consumed elsewhere”.
----
+
+ ---
 ## What we will cover
 In this chapter we will cover:
 - `install(TARGETS ...)`
@@ -29,25 +31,33 @@ In this chapter we will cover:
 - package version files
 - a first look at CPack
 We will keep the first pass practical and focused.
----
+
+ ---
 ## The key mental model
 A useful way to think about this chapter is:
-### Build tree
+
+ ### Build tree
 Where the project is compiled.
-### Install tree
+
+ ### Install tree
 Where the project is laid out for use.
-### Package
+
+ ### Package
 A distributable artifact created from the install information.
 This distinction is important because CMake treats build-tree exports and install-tree exports differently.
----
+
+ ---
 ## Install tree vs build tree
 CMake supports both of these use cases:
-### Build-tree export
+
+ ### Build-tree export
 Useful for directly reusing targets from the current build tree.
-### Install-tree export
+
+ ### Install-tree export
 Useful for installed artifacts that another project can consume after installation.
 That distinction matters because `export(TARGETS ...)` is for the **build tree**, while `install(EXPORT ...)` is for the **install tree**. The `export()` documentation says it exports targets “from the current project's build tree” and explicitly says the file it creates is build-tree-specific and “should never be installed.” :contentReference[oaicite:0]{index=0}
----
+
+ ---
 ## Why installation comes first
 Before a project can be packaged or cleanly reused, it needs install rules.
 Install rules define:
@@ -56,7 +66,8 @@ Install rules define:
 - which parts belong to runtime vs development use
 - which files should be visible to consumers
 CMake’s `install()` command is the mechanism that generates installation rules for a project. The install rules declared through `install()` are then executed during installation. :contentReference[oaicite:1]{index=1}
----
+
+ ---
 ## `install(TARGETS ...)`
 This is the core command for installing built targets.
 Typical targets include:
@@ -73,7 +84,8 @@ install(TARGETS my_app my_lib
 )
 ````
 This is the first install command most readers need to get comfortable with.
----
+
+ ---
 ## `RUNTIME`, `LIBRARY`, and `ARCHIVE`
 These keywords matter because different target artifacts land in different places.
 A simple working mental model is:
@@ -83,7 +95,8 @@ A simple working mental model is:
 CMake’s install documentation explicitly documents these artifact kinds and shows that on DLL platforms, shared libraries can involve both `RUNTIME` and `ARCHIVE` pieces. It also documents built-in default destinations such as `${CMAKE_INSTALL_BINDIR}` → `bin` for `RUNTIME`. ([CMake][1])
 This is one of the reasons install rules can look more detailed than build rules:
 they are describing the install layout, not just compilation.
----
+
+ ---
 ## Relative install destinations
 A very important best practice is to use **relative** install destinations such as:
 * `bin`
@@ -99,13 +112,15 @@ and this is usually a poor tutorial default:
 ```cmake
 install(TARGETS my_app RUNTIME DESTINATION "C:/some/fixed/path")
 ```
----
+
+ ---
 ## `CMAKE_INSTALL_PREFIX`
 When install destinations are relative, they are interpreted relative to `CMAKE_INSTALL_PREFIX`.
 That means a project can be installed under different prefixes without rewriting every install rule. The `install()` documentation explicitly states that relative destinations are interpreted relative to `CMAKE_INSTALL_PREFIX`. ([CMake][1])
 This is one reason install rules scale well:
 the rules describe the layout, while the prefix controls the root location.
----
+
+ ---
 ## Installing headers and other files
 Targets are only part of the install story.
 A library that is meant to be consumed by others often also needs:
@@ -117,7 +132,8 @@ So a normal install story often includes both:
 * `install(TARGETS ...)`
 * `install(FILES ...)`
 The result is not just “the binary exists”, but “the consumer has what they need”.
----
+
+ ---
 ## Exporting targets
 Once targets are installed, another project may want to import them.
 This is where exports come in.
@@ -130,16 +146,20 @@ That means the normal pattern is:
 1. associate targets with an export set
 2. install those targets
 3. install the export file for consumers
----
+
+ ---
 ## `export()` vs `install(EXPORT ...)`
 This distinction is worth repeating because it is one of the most important conceptual points in the chapter.
-### `export(TARGETS ...)`
+
+ ### `export(TARGETS ...)`
 For use directly from the **build tree**.
-### `install(EXPORT ...)`
+
+ ### `install(EXPORT ...)`
 For use from the **install tree**.
 The `export()` documentation says the file it creates is specific to the build tree and should never be installed, while `install(EXPORT ...)` is explicitly the install-tree export mechanism. ([CMake][2])
 For this tutorial, the main focus should be the install-tree path because that is what most users need for a reusable installed package.
----
+
+ ---
 ## Namespaces for exported targets
 When exporting targets, it is common to add a namespace such as:
 ```cmake
@@ -154,7 +174,8 @@ That gives consumers a clean usage style such as:
 target_link_libraries(app PRIVATE MyProject::my_lib)
 ```
 which is a very common and readable CMake package pattern.
----
+
+ ---
 ## Package config files
 Exported targets are important, but a polished reusable package usually also installs:
 * `MyProjectConfig.cmake`
@@ -165,14 +186,16 @@ This is the normal transition from:
 * “I exported some targets”
   to:
 * “another project can find my package”
----
+
+ ---
 ## Package version files
 A package version file helps consumers decide whether the installed package version is compatible with what they asked for.
 CMake’s `CMakePackageConfigHelpers` module provides `write_basic_package_version_file()` for generating this file, and the documented example uses it to create `FooConfigVersion.cmake` alongside the package config file. ([CMake][3])
 That fits very naturally with our earlier versioning chapters:
 * the project already has a version
 * now the installed package can expose version compatibility information too
----
+
+ ---
 ## A likely chapter example
 A good Chapter 11 example should probably contain:
 * one reusable library
@@ -191,7 +214,8 @@ A typical install layout might look something like:
 └─ lib/cmake/MyProject/
 ```
 That kind of layout is the natural outcome of relative install destinations such as `bin`, `lib`, `include`, and `lib/cmake/MyProject`. The install docs also show per-artifact destinations and components in their examples. ([CMake][1])
----
+
+ ---
 ## Components
 CMake install rules also support **components** such as:
 * `Runtime`
@@ -201,7 +225,8 @@ This is useful because many projects naturally split install content into:
 * runtime artifacts for users
 * headers and import/static artifacts for developers
 We do not need to overcomplicate the first example with components, but they are worth introducing.
----
+
+ ---
 ## Packaging with CPack
 Once install rules exist, packaging becomes much easier.
 CPack is the CMake packaging tool, and by default it reads packaging details from `CPackConfig.cmake` in the current directory. The `cpack` manual also documents the `-G` option for selecting one or more package generators and the `-R` option for overriding the package version. ([CMake][4])
@@ -210,7 +235,8 @@ That means the usual progression is:
 2. make the install/export layout correct
 3. use CPack to generate distributable packages
 This is why installation comes before packaging in the tutorial flow.
----
+
+ ---
 ## Why packaging belongs in this chapter, but lightly
 Packaging is important, but it should not dominate the chapter.
 The first thing readers need is the structure:
@@ -223,31 +249,44 @@ A light first exposure is enough:
 * explain what CPack is
 * show where it fits
 * leave deeper generator-specific packaging details for later or as optional expansion
----
+
+ ---
 ## Good habits in this chapter
-### 1. Use relative install destinations
+
+ ### 1. Use relative install destinations
 That keeps install rules relocatable and CPack-friendly. The install docs explicitly recommend relative `DESTINATION` paths. ([CMake][1])
-### 2. Separate build-tree export from install-tree export
+
+ ### 2. Separate build-tree export from install-tree export
 `export()` and `install(EXPORT ...)` serve different purposes. ([CMake][2])
-### 3. Install public headers deliberately
+
+ ### 3. Install public headers deliberately
 Do not assume the target alone is enough for consumers.
-### 4. Use a namespace for exported targets
+
+ ### 4. Use a namespace for exported targets
 That makes consumer code much clearer. Both export mechanisms support `NAMESPACE`. ([CMake][2])
-### 5. Keep package versioning aligned with the project version
+
+ ### 5. Keep package versioning aligned with the project version
 That avoids drift between runtime versioning and package metadata. `write_basic_package_version_file()` is designed for this. ([CMake][3])
----
+
+ ---
 ## Common mistakes
-### 1. Installing to hardcoded absolute paths
+
+ ### 1. Installing to hardcoded absolute paths
 That makes installation and packaging much less flexible. Relative destinations are the recommended style. ([CMake][1])
-### 2. Confusing `export()` with `install(EXPORT ...)`
+
+ ### 2. Confusing `export()` with `install(EXPORT ...)`
 One is for the build tree, the other for the install tree. ([CMake][2])
-### 3. Installing binaries but forgetting headers or config files
+
+ ### 3. Installing binaries but forgetting headers or config files
 That leaves consumers without what they need.
-### 4. Skipping the package version file
+
+ ### 4. Skipping the package version file
 That weakens `find_package()`-style compatibility checks. `write_basic_package_version_file()` exists specifically to generate that file. ([CMake][3])
-### 5. Treating packaging as disconnected from installation
+
+ ### 5. Treating packaging as disconnected from installation
 CPack depends on the installation model and reads packaging configuration from `CPackConfig.cmake` by default. ([CMake][4])
----
+
+ ---
 ## What this chapter intentionally keeps simple
 This first install/export/package chapter does **not** need to cover everything.
 We are intentionally keeping out:
@@ -262,7 +301,8 @@ Those are real topics, but the first clean lesson is:
 * export the right targets
 * generate the right package config files
 * understand where CPack fits
----
+
+ ---
 ## This is enough for now
 At this stage, the key ideas to keep are:
 * `install()` defines installation rules for targets and files
@@ -272,7 +312,8 @@ At this stage, the key ideas to keep are:
 * package config and version files complete the reusable package story
 * CPack builds on top of a correct install layout
 That is the mental model we want before writing the code. ([CMake][1])
----
+
+ ---
 ## Takeaways
 This chapter is where the project starts to become reusable beyond the current build directory.
 We are moving from:
@@ -282,9 +323,10 @@ to:
 * “other projects can import it”
 * “the project can be packaged for distribution”
 That is a major milestone in understanding real CMake project structure.
----
+
+ ---
 ## Next step in this chapter
-The code for this chapter should define:
+The code for this chapter defines:
 * one small reusable library
 * one public header
 * install rules for runtime, library, and headers

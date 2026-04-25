@@ -12,7 +12,8 @@ A lot of the pain people feel with CMake comes from a small number of recurring 
 - mixing target-local settings with global flags
 - not knowing when to reconfigure vs rebuild
 This chapter gathers those lessons in one place.
----
+
+ ---
 ## Why this matters
 A project can be technically correct and still be frustrating to use.
 Teams usually want more than:
@@ -26,7 +27,8 @@ They want:
 - a shared way to invoke common workflows
 CMake already provides the core tools for this.
 The challenge is using them in a disciplined way.
----
+
+ ---
 ## What we will cover
 In this chapter we will cover:
 - practical configure, build, install, test, and package commands
@@ -40,7 +42,8 @@ In this chapter we will cover:
 - `CMAKE_PREFIX_PATH` and package lookup gotchas
 - generator and configuration gotchas
 - when to delete `build/`
----
+
+ ---
 ## The core principle of this chapter
 The best practical rule for modern CMake is:
 > keep project behavior explicit, target-based, and easy to reset
@@ -51,31 +54,48 @@ That applies to:
 - configure state
 - repeated workflows
 The commands we choose should help the build explain itself.
----
+
+ ---
 ## Practical command set
 A good “daily use” command set is small.
-### Configure
-```bash
+
+ ### Configure
+
+ ``` bash
 cmake -S . -B build
-````
-### Build
-```bash
+
+ ``` `
+
+ ### Build
+
+ ``` bash
 cmake --build build
-```
-### Install
-```bash
+
+ ``` 
+
+ ### Install
+
+ ``` bash
 cmake --install build
-```
-### Run tests
-```bash
+
+ ``` 
+
+ ### Run tests
+
+ ``` bash
 ctest --test-dir build --output-on-failure
-```
-### Package
-```bash
+
+ ``` 
+
+ ### Package
+
+ ``` bash
 cpack --config build/CPackConfig.cmake
-```
+
+ ``` 
 CMake’s `cmake(1)` and `cpack(1)` manuals document these command-line interfaces, and `ctest` is the standard test runner for registered CMake tests. The packaging side reads `CPackConfig.cmake` by default or via `--config`. ([CMake][1])
----
+
+ ---
 ## Use target-based compiler options
 For compiler warning levels and similar settings, the best default is:
 * use `target_compile_options(...)`
@@ -83,7 +103,8 @@ For compiler warning levels and similar settings, the best default is:
 * avoid broad project-wide mutation unless you truly want it everywhere
 CMake documents `target_compile_options()` as adding compile options to a specific target through the target’s compile-option properties. ([CMake][2])
 A good pattern looks like this:
-```cmake
+
+ ``` cmake
 function(enable_project_warnings target_name)
     if(MSVC)
         target_compile_options(${target_name} PRIVATE /W4)
@@ -91,9 +112,11 @@ function(enable_project_warnings target_name)
         target_compile_options(${target_name} PRIVATE -Wall -Wextra -Wpedantic)
     endif()
 endfunction()
-```
+
+ ``` 
 This is better than scattering warning flags by hand through many example files.
----
+
+ ---
 ## Warning levels: the practical default
 A good practical first policy is:
 * **MSVC**: `/W4`
@@ -101,24 +124,31 @@ A good practical first policy is:
 These are not magical values from CMake itself.
 They are compiler options, and `target_compile_options()` is the correct CMake place to apply them per target. CMake also documents `add_compile_options()` but explicitly notes that `target_compile_options()` is the target-specific form. ([CMake][2])
 For the tutorial, I would treat this as the default “strict enough to be useful” policy.
----
+
+ ---
 ## Warnings as errors
 CMake has a dedicated target property for this:
 * `COMPILE_WARNING_AS_ERROR`
 This property was added in CMake 3.24 and tells CMake to add the appropriate compiler flags to treat compile warnings as errors, when supported by the current compiler. It is ignored for unsupported compilers. ([CMake][3])
 That means a modern pattern can look like this:
-```cmake
+
+ ``` cmake
 set_property(TARGET my_target PROPERTY COMPILE_WARNING_AS_ERROR ON)
-```
+
+ ``` 
 or, if you want a project-wide initialization for targets created afterward:
-```cmake
+
+ ``` cmake
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
-```
+
+ ``` 
 `CMAKE_COMPILE_WARNING_AS_ERROR` is documented as the variable that initializes the `COMPILE_WARNING_AS_ERROR` target property. ([CMake][4])
----
+
+ ---
 ## A practical warnings helper
 A very workable helper module for a real project is:
-```cmake
+
+ ``` cmake
 function(enable_project_warnings target_name)
     if(MSVC)
         target_compile_options(${target_name} PRIVATE /W4)
@@ -127,14 +157,16 @@ function(enable_project_warnings target_name)
     endif()
     set_property(TARGET ${target_name} PROPERTY COMPILE_WARNING_AS_ERROR ON)
 endfunction()
-```
+
+ ``` 
 Why this is good:
 * warning level is target-local
 * warnings-as-errors are target-local
 * third-party or noisy legacy code can be opted out
 * the project stays readable
 This follows the documented target-based model for compile options and warning-as-error control. ([CMake][2])
----
+
+ ---
 ## Useful escape hatches
 Sometimes you need to **temporarily** disable warnings-as-errors without editing the project files.
 CMake documents this command-line option:
@@ -148,7 +180,8 @@ CMake 4.0 also added:
 * `LINK_WARNING_AS_ERROR`
 * `cmake --link-no-warning-as-error`
 for linker warnings-as-errors, when the compiler/linker implementation supports it. ([CMake][5])
----
+
+ ---
 ## Prefer target-based settings over broad flag variables
 A practical gotcha is overusing variables such as:
 * `CMAKE_CXX_FLAGS`
@@ -160,19 +193,23 @@ A good practical rule is:
 * use target properties for warning-as-error behavior
 * reserve broad flag variables for cases where a user or toolchain needs to influence the whole build
 That is consistent with the target-based direction of modern CMake’s command set, especially `target_compile_options()`. ([CMake][2])
----
+
+ ---
 ## Single-config vs multi-config: do not forget the split
 This tutorial returned to this several times because it causes real confusion.
 For **single-config generators** such as Ninja, `CMAKE_BUILD_TYPE` is the build-type selector. Typical values include `Debug`, `Release`, `RelWithDebInfo`, and `MinSizeRel`, and custom types are also supported. ([CMake][6])
 That means a typical Ninja configure looks like:
-```bash
+
+ ``` bash
 cmake -S . -B build-debug -G Ninja -DCMAKE_BUILD_TYPE=Debug
-```
+
+ ``` 
 For **multi-config generators** such as Visual Studio, configuration is usually chosen at build time with `--config Debug`, `--config Release`, and so on. That behavior is documented through the standard CMake command-line model and the difference between build trees and configurations. ([CMake][1])
 So the practical rule is:
 * Ninja / Makefiles → choose config at configure time
 * Visual Studio / other multi-config flows → choose config at build time
----
+
+ ---
 ## Stale build trees are normal
 One of the biggest CMake gotchas is a stale build tree:
 * old cache values
@@ -183,17 +220,22 @@ One of the biggest CMake gotchas is a stale build tree:
 Deleting the build directory is a completely normal reset strategy.
 CMake 3.24 also added a documented `--fresh` option, which removes the existing `CMakeCache.txt` and associated `CMakeFiles/` content when configuring, effectively starting fresh without manually deleting the whole build tree. ([CMake][1])
 Examples:
-```bash
+
+ ``` bash
 cmake --fresh -S . -B build
-```
+
+ ``` 
 or the traditional reset:
-```text
+
+ ``` text
 delete build/
 reconfigure
 rebuild
-```
+
+ ``` 
 Both are valid practical tools.
----
+
+ ---
 ## When to use `cmake --fresh`
 `cmake --fresh` is a good tool when:
 * the build tree exists, but cache state is suspicious
@@ -202,7 +244,8 @@ Both are valid practical tools.
 * you want a clean reconfigure without manually deleting the directory
 CMake documents `--fresh` as performing a fresh configuration of the build tree. ([CMake][1])
 For a tutorial or CI workflow, that can be clearer than telling everyone to “just delete random files until it works.”
----
+
+ ---
 ## Presets are worth adopting
 CMake presets are one of the best ways to share common configure and build settings.
 The presets manual documents `CMakePresets.json` and `CMakeUserPresets.json` as the files used to specify common configure options and share them with others. ([CMake][7])
@@ -220,7 +263,8 @@ A practical preset can capture:
 * install directory
 * environment
 That is much easier for teams than memorizing long command lines.
----
+
+ ---
 ## Package lookup: `CMAKE_PREFIX_PATH` points to prefixes
 A very common mistake is pointing `CMAKE_PREFIX_PATH` at the wrong level.
 CMake documents `CMAKE_PREFIX_PATH` as a semicolon-separated list of **installation prefixes** searched by `find_package()`, `find_program()`, `find_library()`, `find_file()`, and `find_path()`. Each command then adds the subdirectories it expects, such as `bin`, `lib`, or `include`. ([CMake][8])
@@ -228,7 +272,8 @@ So the practical rule is:
 * point `CMAKE_PREFIX_PATH` at the **install prefix**
 * not directly at random internal subdirectories unless you are using a package-specific override such as `<PackageName>_DIR`
 This is exactly the kind of gotcha we hit in the packaging chapter.
----
+
+ ---
 ## Use `<PackageName>_DIR` when you want maximum explicitness
 When troubleshooting package discovery, a very explicit move is to set:
 * `TutorialMath_DIR`
@@ -238,19 +283,23 @@ That bypasses much of the prefix-search ambiguity and is often useful during bri
 So the practical workflow becomes:
 * normal case → `CMAKE_PREFIX_PATH`
 * debugging case → `<PackageName>_DIR`
----
+
+ ---
 ## Debug package search when it gets confusing
 Package lookup can be opaque if you do not ask CMake to explain itself.
 A practical tip is to use:
-```bash
+
+ ``` bash
 cmake --debug-find ...
-```
+
+ ``` 
 CMake’s package-search behavior and the way prefix paths are expanded under install prefixes are exactly the kinds of things this helps expose. CMake community guidance also notes that `CMAKE_PREFIX_PATH` is not searched recursively; instead, CMake checks specific subpaths under each prefix. ([CMake Discourse][9])
 That is very useful when:
 * a package is not found
 * the wrong package is found
 * multiple versions exist on the same machine
----
+
+ ---
 ## Keep generated and installed paths separate in your head
 Another practical gotcha is mixing up:
 * source tree
@@ -265,7 +314,8 @@ This is why the earlier install/export chapter separated:
 * build-tree artifacts
 * install-tree package consumption
 and why `CMAKE_PREFIX_PATH` should normally point at the **install prefix**, not the producer build directory. ([CMake][8])
----
+
+ ---
 ## Release is often the smoother default for tooling-heavy demos on Windows
 For tooling-heavy chapters such as SWIG + Python on Windows, `Release` or `RelWithDebInfo` is often smoother than `Debug`, because external toolchains and prebuilt runtimes frequently line up more easily with release-style artifacts.
 This is not a universal law, but it is a very practical tutorial guideline.
@@ -273,7 +323,8 @@ It fits the broader CMake distinction that `CMAKE_BUILD_TYPE` is a first-class s
 So the practical advice is:
 * start with `Release` when native tooling meets external runtimes
 * move to `Debug` only when you know the full environment supports it cleanly
----
+
+ ---
 ## Use helper modules for repeated policy
 Once a project starts repeating the same setup, move it into `cmake/` helper modules.
 Typical examples:
@@ -282,10 +333,12 @@ Typical examples:
 * `cmake/helpers.cmake`
 That keeps example chapters readable and centralizes recurring policy such as warning levels, warning-as-error rules, and shared helper functions.
 This is not a special CMake feature by itself, but it fits the target-based and modular command structure CMake is built around. ([CMake][2])
----
+
+ ---
 ## A practical warning helper module pattern
 A realistic module might look like this:
-```cmake
+
+ ``` cmake
 function(enable_project_warnings target_name)
     if(MSVC)
         target_compile_options(${target_name} PRIVATE /W4)
@@ -294,35 +347,50 @@ function(enable_project_warnings target_name)
     endif()
     set_property(TARGET ${target_name} PROPERTY COMPILE_WARNING_AS_ERROR ON)
 endfunction()
-```
+
+ ``` 
 That is a good example of using target-specific compile options plus the dedicated warning-as-error property. ([CMake][2])
----
+
+ ---
 ## Good habits to keep after this tutorial
-### 1. Prefer target-based settings
+
+ ### 1. Prefer target-based settings
 Use target commands and target properties when you can. `target_compile_options()` is the model here. ([CMake][2])
-### 2. Keep build trees disposable
+
+ ### 2. Keep build trees disposable
 Use out-of-source builds and reset them freely when needed. `cmake --fresh` now gives you an official clean-reconfigure path. ([CMake][1])
-### 3. Use presets for team workflows
+
+ ### 3. Use presets for team workflows
 Presets are explicitly designed for sharing common configure options and repeated workflows. ([CMake][7])
-### 4. Treat package lookup as a prefix problem first
+
+ ### 4. Treat package lookup as a prefix problem first
 `CMAKE_PREFIX_PATH` is about install prefixes, not arbitrary internal folders. ([CMake][8])
-### 5. Be explicit when debugging
+
+ ### 5. Be explicit when debugging
 Use `<PackageName>_DIR`, `--debug-find`, and small dedicated build trees when something is unclear. ([CMake Discourse][9])
----
+
+ ---
 ## Common mistakes
-### 1. Putting warning flags into random global variables
+
+ ### 1. Putting warning flags into random global variables
 That makes behavior harder to reason about than target-local settings. `target_compile_options()` exists specifically for target-scoped compile options. ([CMake][2])
-### 2. Treating warnings-as-errors as all-or-nothing forever
+
+ ### 2. Treating warnings-as-errors as all-or-nothing forever
 CMake gives you both target-local control and command-line escape hatches. ([CMake][3])
-### 3. Forgetting the generator/config split
+
+ ### 3. Forgetting the generator/config split
 `CMAKE_BUILD_TYPE` is only for single-config generators. ([CMake][6])
-### 4. Pointing `CMAKE_PREFIX_PATH` at the wrong folder
+
+ ### 4. Pointing `CMAKE_PREFIX_PATH` at the wrong folder
 It wants install prefixes. CMake then searches expected subdirectories beneath them. ([CMake][8])
-### 5. Fighting a stale cache too long
+
+ ### 5. Fighting a stale cache too long
 Sometimes the fastest fix is a fresh configure or a clean build directory. `cmake --fresh` exists for this reason. ([CMake][1])
-### 6. Repeating the same command-line incantations by hand forever
+
+ ### 6. Repeating the same command-line incantations by hand forever
 Presets are the right long-term answer for shared project workflows. ([CMake][7])
----
+
+ ---
 ## What this chapter intentionally does not try to do
 This final chapter is practical, not exhaustive.
 It does not try to:
@@ -331,7 +399,8 @@ It does not try to:
 * define one universal preset structure
 * replace the full CMake manual
 Instead, it tries to leave the reader with a small set of habits and tools that prevent the most common frustrations.
----
+
+ ---
 ## This is enough for now
 At this stage, the key ideas to keep are:
 * use target-based compile options
@@ -343,7 +412,8 @@ At this stage, the key ideas to keep are:
 * point `CMAKE_PREFIX_PATH` at install prefixes
 * use explicit package directories when debugging package lookup
 That is the practical layer that sits on top of everything else in the tutorial. ([CMake][2])
----
+
+ ---
 ## Takeaways
 This chapter closes the loop.
 The tutorial started with:
@@ -357,7 +427,8 @@ It ends with:
 * how to help a team use the project consistently
 That is the practical side of modern CMake:
 not just writing `CMakeLists.txt`, but making the project usable.
----
+
+ ---
 [1]: https://cmake.org/cmake/help/latest/manual/cmake.1.html?utm_source=chatgpt.com "cmake(1) — CMake 4.3.2 Documentation"
 [2]: https://cmake.org/cmake/help/latest/command/target_compile_options.html?utm_source=chatgpt.com "target_compile_options — CMake 4.3.2 Documentation"
 [3]: https://cmake.org/cmake/help/latest/prop_tgt/COMPILE_WARNING_AS_ERROR.html?utm_source=chatgpt.com "COMPILE_WARNING_AS_ERR..."
